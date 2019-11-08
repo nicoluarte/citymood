@@ -57,7 +57,7 @@ low <- ggplot(byIncomeLow, aes(x = Noise, y = Valence_num)) +
     xlab("") + ylab("Pr (positve mood)")  +
     labs(color = "Mood") +
     guides(color = guide_legend(override.aes = list(alpha = 1))) +
-    ggtitle("A. Low income") +
+    ggtitle("a. Low income") +
     theme_pubr() +
     theme(plot.title = element_text(hjust = 0.5)) +
     theme(legend.position = "none")
@@ -69,7 +69,7 @@ middle <- ggplot(byIncomeMiddle, aes(x = Noise, y = Valence_num)) +
     xlab("Noise") + ylab("")  +
     labs(color = "Mood") +
     guides(color = guide_legend(override.aes = list(alpha = 1))) +
-    ggtitle("B. Middle income") +
+    ggtitle("b. Middle income") +
     theme_pubr() +
     theme(plot.title = element_text(hjust = 0.5)) +
     theme(legend.position = "none")
@@ -81,11 +81,11 @@ high <- ggplot(byIncomeHigh, aes(x = Noise, y = Valence_num)) +
     xlab("") + ylab("")  +
     labs(color = "Mood") +
     guides(color = guide_legend(override.aes = list(alpha = 1))) +
-    ggtitle("C. High income") +
+    ggtitle("c. High income") +
     theme_pubr() +
     theme(plot.title = element_text(hjust = 0.5)) +
     theme(
-        legend.position = c(.95, .95),
+        legend.position = c(.95, .65),
         legend.justification = c("right", "top"),
         legend.box.just = "right",
         legend.margin = margin(6, 6, 6, 6)
