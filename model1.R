@@ -36,7 +36,7 @@ ggplot(dataNum, aes(x = Noise, y = Valence_num)) +
     stat_smooth(method = "glm", method.args = list(family = "binomial"), formula = y ~ x,
                 alpha = 0.2, size = 0.5, color = "black") +
     geom_point(position = position_jitter(height = 0.03, width = 0), aes(color = factor(Valence_num,
-                                                                                        labels = c("Postive", "Negative"))), alpha = 1/5) +
+                                                                                        labels = c("Negative", "Postive"))), alpha = 1/5) +
     xlab("Noise") + ylab("Pr (positve mood)")  +
     labs(color = "Mood") +
     guides(color = guide_legend(override.aes = list(alpha = 1))) +
@@ -48,40 +48,51 @@ byIncomeLow <- filter(dataNum, Socioeconomic == "Low")
 byIncomeMiddle <- filter(dataNum, Socioeconomic == "Middle")
 byIncomeHigh <- filter(dataNum, Socioeconomic == "High")
 
-tiff("/home/nicoluarte/citymood/interaction.tiff", res=600, compression = "lzw", height=5, width=5, units="in")
+tiff("/home/nicoluarte/citymood/interaction.tiff", res=600, compression = "lzw", height=6, width=12, units="in")
 low <- ggplot(byIncomeLow, aes(x = Noise, y = Valence_num)) +
     stat_smooth(method = "glm", method.args = list(family = "binomial"), formula = y ~ x,
                 alpha = 0.2, size = 0.5, color = "black") +
     geom_point(position = position_jitter(height = 0.03, width = 0), aes(color = factor(Valence_num,
                                                                                         labels = c("Postive", "Negative"))), alpha = 1/5) +
-    xlab("Noise") + ylab("Pr (positve mood)")  +
+    xlab("") + ylab("Pr (positve mood)")  +
     labs(color = "Mood") +
     guides(color = guide_legend(override.aes = list(alpha = 1))) +
-    ggtitle("Low income") +
+    ggtitle("A. Low income") +
     theme_pubr() +
-    theme(plot.title = element_text(hjust = 0.5))
+    theme(plot.title = element_text(hjust = 0.5)) +
+    theme(legend.position = "none")
 middle <- ggplot(byIncomeMiddle, aes(x = Noise, y = Valence_num)) +
     stat_smooth(method = "glm", method.args = list(family = "binomial"), formula = y ~ x,
                 alpha = 0.2, size = 0.5, color = "black") +
     geom_point(position = position_jitter(height = 0.03, width = 0), aes(color = factor(Valence_num,
                                                                                         labels = c("Postive", "Negative"))), alpha = 1/5) +
-    xlab("Noise") + ylab("Pr (positve mood)")  +
+    xlab("Noise") + ylab("")  +
     labs(color = "Mood") +
     guides(color = guide_legend(override.aes = list(alpha = 1))) +
-    ggtitle("Middle income") +
+    ggtitle("B. Middle income") +
     theme_pubr() +
-    theme(plot.title = element_text(hjust = 0.5))
+    theme(plot.title = element_text(hjust = 0.5)) +
+    theme(legend.position = "none")
 high <- ggplot(byIncomeHigh, aes(x = Noise, y = Valence_num)) +
     stat_smooth(method = "glm", method.args = list(family = "binomial"), formula = y ~ x,
                 alpha = 0.2, size = 0.5, color = "black") +
     geom_point(position = position_jitter(height = 0.03, width = 0), aes(color = factor(Valence_num,
-                                                                                        labels = c("Postive", "Negative"))), alpha = 1/5) +
-    xlab("Noise") + ylab("Pr (positve mood)")  +
+                                                                                        labels = c("Negative", "Positive"))), alpha = 1/5) +
+    xlab("") + ylab("")  +
     labs(color = "Mood") +
     guides(color = guide_legend(override.aes = list(alpha = 1))) +
-    ggtitle("High income") +
+    ggtitle("C. High income") +
     theme_pubr() +
-    theme(plot.title = element_text(hjust = 0.5))
+    theme(plot.title = element_text(hjust = 0.5)) +
+    theme(
+        legend.position = c(.95, .95),
+        legend.justification = c("right", "top"),
+        legend.box.just = "right",
+        legend.margin = margin(6, 6, 6, 6)
+    )
+low <- low + scale_x_continuous(limits=c(0, 0.05))
+middle <- middle + scale_x_continuous(limits=c(0, 0.05))
+high <- high + scale_x_continuous(limits=c(0, 0.05))
 grid.arrange(low, middle, high, nrow = 1)
 dev.off()
 
@@ -123,12 +134,30 @@ maxKappaMdl1 <- mdl1Thresholds[which.max(mdl1Thresholds[, "Kappa"]), ]
 
 ## permutations test model 0
 dataNum <- read.csv("data.csv")
+nullModel0 <- glm(Valence ~ 0,
+              data = data,
+              family = binomial())
 model0 <- glm(Valence ~ Noise,
               data = data,
               family = binomial())
-model1 <- glm(Valence ~ Socioeconomic + Socioeconomic:Noise,
+model1 <- glm(Valence ~ Socioeconomic + Socioeconomic:Noise + 0,
               data = data,
               family = binomial())
+
+model2 <- glm(Valence ~ Socioeconomic + Noise + 0,
+              data = data,
+              family = binomial())
+summary(model1)
+summary(model2)
+plot(allEffects(model1))
+aod::wald.test(b = coef(model1), Sigma = vcov(model1), Terms = 4)
+aod::wald.test(b = coef(model1), Sigma = vcov(model1), Terms = 5)
+aod::wald.test(b = coef(model1), Sigma = vcov(model1), Terms = 6)
+
+anova(model0, model1, test = "LRT")
+lrt0 <- lrtest(model0, model1)
+summary(model1)
+
 pTestModel0 <- prr.test(Valence~Noise,
                         "Noise",
                         data = data,
